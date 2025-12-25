@@ -17,5 +17,6 @@
 <img width="1068" height="710" alt="PixPin_2025-12-25_18-54-49" src="https://github.com/user-attachments/assets/dfa0b2f7-3fff-41b8-8648-7597089b5166" />
 
 详情页&菜单
-<img width="1068" height="710" alt="PixPin_2025-12-25_19-28-40" src="https://github.com/user-attachments/assets/cda041f0-62df-4855-b267-129a49684f7d" />
+<img width="1068" height="710" alt="PixPin_2025-12-25_19-35-06" src="https://github.com/user-attachments/assets/fac81f83-5d1c-42f4-afdb-be5c48565628" />
+
 
