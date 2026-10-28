@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Mercari RMB 价格显示
 // @namespace    http://tampermonkey.net/
-// @version      1.3.0
-// @description  适配 Mercari 主站、Shops 页、搜索页、详情页，显示换算的 RMB 价格，可修改汇率。
+// @version      1.4.0
+// @description  适配 Mercari 新版主站、搜索页、详情页，显示换算的 RMB 价格，可修改汇率。
 // @author       ZhFuwe
 // @match        https://jp.mercari.com/*
 // @match        https://mercari-shops.com/*
@@ -66,8 +66,8 @@
         .rmb-save-btn { width: 100%; background: #d32f2f; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; margin-top: 15px; font-weight:bold;}
         
         /* 布局修正 */
-        [data-testid="item-cell"] > div > a, .merItemThumbnail, mer-item-thumbnail, mer-item-thumbnail::part(container), a[data-testid="item-thumbnail-link"], div[data-testid="product-box"] { position: relative !important; }
-        [data-testid="price"], [data-testid="product-price"] { display: inline-flex; align-items: center; flex-wrap: wrap; }
+        [data-testid="item-cell"] > div > a, [data-testid="thumbnail-link"], .merItemThumbnail, mer-item-thumbnail, mer-item-thumbnail::part(container), a[data-testid="item-thumbnail-link"], div[data-testid="product-box"] { position: relative !important; }
+        [data-testid="price"]:not(li[data-testid="price"]), [data-testid="product-price"] { display: inline-flex; align-items: center; flex-wrap: wrap; }
     `);
 
     function calc(cleanNumStr) {
@@ -109,6 +109,20 @@
     }
 
     function mainLoop() {
+        // 新版主站（首页/搜索页/推荐列表）的商品卡片。
+        // 价格节点位于卡片内部，角标挂在链接上，避免改变原价格布局。
+        document.querySelectorAll('a[data-testid="thumbnail-link"]:not([data-rmb-done])').forEach(card => {
+            const priceNode = card.querySelector('[data-testid="item-tile-price"]');
+            if (priceNode) appendTagToElement(card, priceNode.innerText || priceNode.textContent);
+        });
+
+        // 兼容新版页面中未带 data-testid 的同类卡片（例如局部推荐组件）。
+        document.querySelectorAll('a[href*="/item/"]:not([data-rmb-done])').forEach(card => {
+            const priceNode = card.querySelector('[data-testid="item-tile-price"]');
+            if (priceNode) appendTagToElement(card, priceNode.innerText || priceNode.textContent);
+        });
+
+        // 旧版卖家主页、商店内搜索和历史页面结构，继续保留原选择器。
         document.querySelectorAll('[aria-label*="円"]:not([data-rmb-done])').forEach(el => appendTagToElement(el, el.getAttribute('aria-label')));
         document.querySelectorAll('mer-item-thumbnail').forEach(host => {
             if (host.shadowRoot) {
@@ -123,7 +137,7 @@
         });
 
         // 详情页
-        const detailTargets = document.querySelectorAll(`[data-testid="price"]:not([data-rmb-done]), mer-price:not([data-rmb-done]), .item-price:not([data-rmb-done]), [data-testid="product-price"]:not([data-rmb-done])`);
+        const detailTargets = document.querySelectorAll(`[data-testid="price"]:not(li[data-testid="price"]):not([data-rmb-done]), mer-price:not([data-rmb-done]), .item-price:not([data-rmb-done]), [data-testid="product-price"]:not([data-rmb-done])`);
         detailTargets.forEach(el => {
             el.setAttribute('data-rmb-done', 'true');
             const rawPrice = el.getAttribute('value') || el.innerText;
